@@ -1,0 +1,33 @@
+name: Extract Aldos RPG v120 for analysis
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout pull request
+        uses: actions/checkout@v4
+
+      - name: Extract project and references
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p extracted/references
+          unzip -q AldosRPG_v120_MOBILE_COMPACT_FIX_FULL.zip -d extracted/project
+          find . -maxdepth 1 -type f \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' \) -exec cp -v {} extracted/references/ \;
+          find extracted -maxdepth 4 -type f | sort | head -300
+
+      - name: Upload extracted project
+        uses: actions/upload-artifact@v4
+        with:
+          name: aldos-v120-extracted
+          path: extracted
+          compression-level: 0
+          retention-days: 1
